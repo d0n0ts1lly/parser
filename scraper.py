@@ -4,6 +4,7 @@ import time
 import random
 import requests
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -13,9 +14,28 @@ import threading
 # =======================
 # Настройки Selenium
 # =======================
-download_dir = os.path.abspath("/Users/d0n0ts1lly/Desktop/bwauto/to_BD/copart_download")
+download_dir = os.path.abspath("downloads")
+os.makedirs(download_dir, exist_ok=True)
+
+# Данные из GitHub Secrets
+COPART_USER = os.environ["COPART_USER"]
+COPART_PASS = os.environ["COPART_PASS"]
+FLASK_CLEAR_URL = os.environ["FLASK_CLEAR_URL"]
+FLASK_UPLOAD_URL = os.environ["FLASK_UPLOAD_URL"]
+
+# =======================
+# Selenium настройки
+# =======================
+chrome_path = "/usr/bin/chromium-browser"
+driver_path = "/usr/bin/chromedriver"
 
 options = webdriver.ChromeOptions()
+options.binary_location = chrome_path
+options.add_argument("--headless=new")           # headless-режим
+options.add_argument("--no-sandbox")             # важно для GitHub Actions
+options.add_argument("--disable-dev-shm-usage")  # решает проблему с памятью
+options.add_argument("--window-size=1920,1080")
+
 prefs = {
     "download.default_directory": download_dir,
     "download.prompt_for_download": False,
@@ -24,7 +44,7 @@ prefs = {
 }
 options.add_experimental_option("prefs", prefs)
 
-driver = webdriver.Chrome(options=options)
+driver = webdriver.Chrome(service=Service(driver_path), options=options)
 wait = WebDriverWait(driver, 30)
 
 # =======================
@@ -76,12 +96,12 @@ try:
 
     email_input = wait.until(EC.presence_of_element_located((By.ID, "username")))
     email_input.clear()
-    email_input.send_keys("worldauto@ukr.net")
+    email_input.send_keys("COPART_USER")
     time.sleep(5)
 
     password_input = wait.until(EC.presence_of_element_located((By.ID, "password")))
     password_input.clear()
-    password_input.send_keys("autocola1")
+    password_input.send_keys("COPART_PASS")
     time.sleep(5)
 
     login_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.cprt-btn-yellow")))
