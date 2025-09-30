@@ -30,3 +30,8 @@ jobs:
 
       - name: Run scraper
         run: python scraper.py
+        env:
+          COPART_USER: ${{ secrets.COPART_USER }}
+          COPART_PASS: ${{ secrets.COPART_PASS }}
+          FLASK_CLEAR_URL: ${{ secrets.FLASK_CLEAR_URL }}
+          FLASK_UPLOAD_URL: ${{ secrets.FLASK_UPLOAD_URL }}
