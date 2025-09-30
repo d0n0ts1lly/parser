@@ -256,10 +256,10 @@ try:
         print("❌ Не удалось войти в систему")
 
     # УБИРАЕМ лишний клик - файл УЖЕ должен скачаться после логина
-    # down_but = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".cprt-btn-white.export-csv-button")))
-    # driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", down_but)
-    # driver.execute_script("arguments[0].click();", down_but)
-    # time.sleep(5)
+    down_but = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".cprt-btn-white.export-csv-button")))
+    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", down_but)
+    driver.execute_script("arguments[0].click();", down_but)
+    time.sleep(5)
 
     # Ждем скачивания первого файла и переименовываем его
     if wait_for_download_complete(timeout=45):
