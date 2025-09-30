@@ -12,6 +12,23 @@ import concurrent.futures
 import threading
 import glob
 
+# =======================
+# Настройка виртуального дисплея
+# =======================
+# Проверяем, запущено ли на GitHub Actions
+is_github_actions = os.getenv('GITHUB_ACTIONS') is not None
+
+if is_github_actions:
+    try:
+        from pyvirtualdisplay import Display
+        display = Display(visible=0, size=(1920, 1080))
+        display.start()
+        print("🖥️ Виртуальный дисплей запущен на GitHub Actions")
+    except Exception as e:
+        print(f"⚠ Не удалось запустить виртуальный дисплей: {e}")
+else:
+    print("🖥️ Локальный запуск")
+
 # Абсолютный путь к папке загрузок
 download_dir = os.path.join(os.getcwd(), "downloads")
 os.makedirs(download_dir, exist_ok=True)
@@ -28,14 +45,17 @@ FLASK_CLEAR_URL = os.environ["FLASK_CLEAR_URL"]
 FLASK_UPLOAD_URL = os.environ["FLASK_UPLOAD_URL"]
 
 # =======================
-# Selenium настройки
+# Selenium настройки БЕЗ headless
 # =======================
 chrome_path = "/usr/bin/chromium-browser"
 driver_path = "/usr/bin/chromedriver"
 
 options = webdriver.ChromeOptions()
 options.binary_location = chrome_path
-options.add_argument("--headless=new")
+
+# УБИРАЕМ headless аргумент для работы с виртуальным дисплеем
+# options.add_argument("--headless=new")  # ЗАКОММЕНТИРОВАНО
+
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("--disable-gpu")
@@ -144,6 +164,36 @@ def dwn():
         print("❌ Новые файлы не обнаружены")
     
     return download_success
+
+# =======================
+# Функция для логина (ИСПРАВЛЕНА)
+# =======================
+def login_to_copart():
+    """Выполняет вход в Copart"""
+    try:
+        print("🔐 Выполняем вход в Copart...")
+        
+        email_input = wait.until(EC.presence_of_element_located((By.ID, "username")))
+        email_input.clear()
+        email_input.send_keys(COPART_USER)  # БЕЗ КАВЫЧЕК - используем переменную
+        print("✅ Логин введен")
+        time.sleep(2)
+
+        password_input = wait.until(EC.presence_of_element_located((By.ID, "password")))
+        password_input.clear()
+        password_input.send_keys(COPART_PASS)  # БЕЗ КАВЫЧЕК - используем переменную
+        print("✅ Пароль введен")
+        time.sleep(2)
+
+        login_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.cprt-btn-yellow")))
+        login_button.click()
+        print("✅ Кнопка входа нажата")
+        time.sleep(5)
+        
+        return True
+    except Exception as e:
+        print(f"❌ Ошибка входа: {e}")
+        return False
     
 # =======================
 # Скачиваем CSV с сайта Copart
@@ -171,21 +221,11 @@ try:
 
     time.sleep(5)
 
-    email_input = wait.until(EC.presence_of_element_located((By.ID, "username")))
-    email_input.clear()
-    email_input.send_keys("COPART_USER")
-    time.sleep(5)
-
-    password_input = wait.until(EC.presence_of_element_located((By.ID, "password")))
-    password_input.clear()
-    password_input.send_keys("COPART_PASS")
-    time.sleep(5)
-
-    login_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.cprt-btn-yellow")))
-    login_button.click()
-    time.sleep(5)
-
-
+    # ИСПРАВЛЕНО: используем функцию логина вместо прямого ввода
+    if login_to_copart():
+        print("✅ Успешный вход в систему")
+    else:
+        print("❌ Не удалось войти в систему")
 
     down_but = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".cprt-btn-white.export-csv-button")))
     driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", down_but)
@@ -201,6 +241,16 @@ try:
     dwn()
 
     print("Файлы в папке downloads:", os.listdir(download_dir))
+
+    except Exception as e:
+        print(f"❌ Произошла ошибка: {e}")
+    finally:
+        # Закрываем драйвер
+        driver.quit()
+        # Останавливаем виртуальный дисплей если он был запущен
+        if is_github_actions and 'display' in locals():
+            display.stop()
+            print("🖥️ Виртуальный дисплей остановлен")
 
     driver.get("https://www.copart.com/ru/lotSearchResults?free=false&searchCriteria=%7B%22query%22:%5B%22*%22%5D,%22filter%22:%7B%22MAKE%22:%5B%22lot_make_desc:%5C%22DODGE%5C%22%22%5D,%22MISC%22:%5B%22%23VehicleTypeCode:VEHTYPE_V%22,%22%23EXUPLTS:auction_date_utc:*%22%5D,%22ODM%22:%5B%22odometer_reading_received:%5B0%20TO%209999999%5D%22%5D,%22YEAR%22:%5B%22lot_year:%5B2011%20TO%202026%5D%22%5D%7D,%22watchListOnly%22:false,%22searchName%22:%22%22,%22freeFormSearch%22:false%7D&displayStr=AUTOMOBILE,%5B0%20TO%209999999%5D,%5B2015%20TO%202026%5D,Audi&from=%2FvehicleFinder&fromSource=widget&qId=655dade8-be5d-47c3-9e34-130c4cb31ff7-1755087889113")
     dwn()
