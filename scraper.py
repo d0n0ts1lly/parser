@@ -255,9 +255,25 @@ try:
     else:
         print("❌ Не удалось войти в систему")
 
-    down_but = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".cprt-btn-white.export-csv-button")))
-    driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", down_but)
-    driver.execute_script("arguments[0].click();", down_but)
+    # УБИРАЕМ лишний клик - файл УЖЕ должен скачаться после логина
+    # down_but = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".cprt-btn-white.export-csv-button")))
+    # driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", down_but)
+    # driver.execute_script("arguments[0].click();", down_but)
+    # time.sleep(5)
+
+    # Ждем скачивания первого файла и переименовываем его
+    if wait_for_download_complete(timeout=45):
+        # Переименовываем первый файл
+        csv_files = glob.glob(os.path.join(download_dir, "*.csv"))
+        if csv_files:
+            original_filename = os.path.basename(csv_files[0])
+            new_filename = f"copart_0.csv"
+            original_path = os.path.join(download_dir, original_filename)
+            new_path = os.path.join(download_dir, new_filename)
+            if os.path.exists(original_path):
+                os.rename(original_path, new_path)
+                print(f"✅ Первый файл переименован в: {new_filename}")
+
 
     time.sleep(5)
 
