@@ -2,8 +2,12 @@ name: Run Scraper
 
 on:
   schedule:
-    - cron: "0 */4 * * *"   # каждые 4 часа
-  workflow_dispatch:        # запуск вручную через GitHub UI
+    - cron: "*/30 * * * *"   # каждые 30 минут
+  workflow_dispatch:
+
+concurrency:
+  group: scraper
+  cancel-in-progress: true
 
 jobs:
   scrape:
