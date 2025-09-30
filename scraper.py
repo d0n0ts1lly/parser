@@ -194,7 +194,7 @@ def login_to_copart():
     except Exception as e:
         print(f"❌ Ошибка входа: {e}")
         return False
-    
+
 # =======================
 # Скачиваем CSV с сайта Copart
 # =======================
@@ -233,7 +233,6 @@ try:
 
     time.sleep(5)
 
-
     driver.get("https://www.copart.com/ru/lotSearchResults?free=false&searchCriteria=%7B%22query%22:%5B%22*%22%5D,%22filter%22:%7B%22MISC%22:%5B%22%23VehicleTypeCode:VEHTYPE_V%22,%22%23MakeCode:AUDI%20OR%20%23MakeDesc:Audi%22,%22%23EXUPLTS:auction_date_utc:*%22%5D,%22ODM%22:%5B%22odometer_reading_received:%5B0%20TO%209999999%5D%22%5D,%22YEAR%22:%5B%22lot_year:%5B2011%20TO%202026%5D%22%5D%7D,%22watchListOnly%22:false,%22searchName%22:%22%22,%22freeFormSearch%22:false%7D&displayStr=AUTOMOBILE,%5B0%20TO%209999999%5D,%5B2015%20TO%202026%5D,Audi&from=%2FvehicleFinder&fromSource=widget&qId=655dade8-be5d-47c3-9e34-130c4cb31ff7-1755087161008")
     dwn()
 
@@ -241,16 +240,6 @@ try:
     dwn()
 
     print("Файлы в папке downloads:", os.listdir(download_dir))
-
-    except Exception as e:
-        print(f"❌ Произошла ошибка: {e}")
-    finally:
-        # Закрываем драйвер
-        driver.quit()
-        # Останавливаем виртуальный дисплей если он был запущен
-        if is_github_actions and 'display' in locals():
-            display.stop()
-            print("🖥️ Виртуальный дисплей остановлен")
 
     driver.get("https://www.copart.com/ru/lotSearchResults?free=false&searchCriteria=%7B%22query%22:%5B%22*%22%5D,%22filter%22:%7B%22MAKE%22:%5B%22lot_make_desc:%5C%22DODGE%5C%22%22%5D,%22MISC%22:%5B%22%23VehicleTypeCode:VEHTYPE_V%22,%22%23EXUPLTS:auction_date_utc:*%22%5D,%22ODM%22:%5B%22odometer_reading_received:%5B0%20TO%209999999%5D%22%5D,%22YEAR%22:%5B%22lot_year:%5B2011%20TO%202026%5D%22%5D%7D,%22watchListOnly%22:false,%22searchName%22:%22%22,%22freeFormSearch%22:false%7D&displayStr=AUTOMOBILE,%5B0%20TO%209999999%5D,%5B2015%20TO%202026%5D,Audi&from=%2FvehicleFinder&fromSource=widget&qId=655dade8-be5d-47c3-9e34-130c4cb31ff7-1755087889113")
     dwn()
@@ -324,9 +313,17 @@ try:
     driver.get("https://www.copart.com/ru/lotSearchResults?free=false&searchCriteria=%7B%22query%22:%5B%22*%22%5D,%22filter%22:%7B%22MAKE%22:%5B%22lot_make_desc:%5C%22NISSAN%5C%22%22%5D,%22MISC%22:%5B%22%23VehicleTypeCode:VEHTYPE_V%22,%22%23EXUPLTS:auction_date_utc:*%22%5D,%22ODM%22:%5B%22odometer_reading_received:%5B0%20TO%209999999%5D%22%5D,%22YEAR%22:%5B%22lot_year:%5B2011%20TO%202026%5D%22%5D%7D,%22watchListOnly%22:false,%22searchName%22:%22%22,%22freeFormSearch%22:false%7D&displayStr=AUTOMOBILE,%5B0%20TO%209999999%5D,%5B2011%20TO%202026%5D&from=%2FvehicleFinder&fromSource=widget&qId=655dade8-be5d-47c3-9e34-130c4cb31ff7-1757615549643")
     dwn()
 
+except Exception as e:
+    print(f"❌ Произошла ошибка: {e}")
 finally:
+    # Закрываем драйвер
     driver.quit()
+    # Останавливаем виртуальный дисплей если он был запущен
+    if is_github_actions and 'display' in locals():
+        display.stop()
+        print("🖥️ Виртуальный дисплей остановлен")
 print(f"⏱ CSV скачаны за {time.perf_counter() - start_time:.2f} секунд")
+
 
 # =======================
 # Нормализация марок
