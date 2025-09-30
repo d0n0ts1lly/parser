@@ -32,7 +32,7 @@ jobs:
         run: |
           export CHROME_BIN=/usr/bin/chromium-browser
           export PATH=$PATH:/usr/lib/chromium-browser/
-          python scraper.py
+          python -u scraper.py
         env:
           COPART_USER: ${{ secrets.COPART_USER }}
           COPART_PASS: ${{ secrets.COPART_PASS }}
