@@ -23,13 +23,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install Chrome & chromedriver
+      - name: Install Chromium & chromedriver
         run: |
           sudo apt-get update
           sudo apt-get install -y chromium-browser chromium-chromedriver
 
       - name: Run scraper
-        run: python scraper.py
+        run: |
+          export CHROME_BIN=/usr/bin/chromium-browser
+          export PATH=$PATH:/usr/lib/chromium-browser/
+          python scraper.py
         env:
           COPART_USER: ${{ secrets.COPART_USER }}
           COPART_PASS: ${{ secrets.COPART_PASS }}
