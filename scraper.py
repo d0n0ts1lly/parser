@@ -16,6 +16,8 @@ import threading
 # =======================
 download_dir = os.path.abspath("downloads")
 os.makedirs(download_dir, exist_ok=True)
+print("Download folder:", download_dir)
+print("Exists?", os.path.exists(download_dir))
 
 # Данные из GitHub Secrets
 COPART_USER = os.environ["COPART_USER"]
