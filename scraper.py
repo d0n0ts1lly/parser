@@ -47,6 +47,13 @@ prefs = {
 options.add_experimental_option("prefs", prefs)
 
 driver = webdriver.Chrome(service=Service(driver_path), options=options)
+
+# Принудительно указываем путь для загрузки
+driver.execute_cdp_cmd(
+    "Page.setDownloadBehavior",
+    {"behavior": "allow", "downloadPath": download_dir}
+)
+
 wait = WebDriverWait(driver, 30)
 
 # =======================
