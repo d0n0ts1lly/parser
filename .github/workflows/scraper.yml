@@ -31,7 +31,14 @@ jobs:
       - name: Install Chromium & chromedriver
         run: |
           sudo apt-get update
-          sudo apt-get install -y chromium-browser chromium-chromedriver xvfb  # ДОБАВЛЕНО xvfb
+          sudo apt-get install -y chromium-browser chromium-chromedriver xvfb
+
+      - name: Check Chrome & Driver versions
+        run: |
+          which chromium-browser || echo "chromium not found"
+          chromium-browser --version || echo "no chromium version"
+          which chromedriver || echo "chromedriver not found"
+          chromedriver --version || echo "no chromedriver version"
 
       - name: Run scraper
         run: |
