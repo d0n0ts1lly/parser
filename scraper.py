@@ -98,6 +98,18 @@ def move_and_rename_file(original_filename, new_filename):
         return True
     return False
 
+def parse_sale_date(date_str):
+    if not date_str or date_str.startswith("Будущий"):
+        return None
+    try:
+        # Пример: "09/30/2025 01:00 am GMT+3"
+        parts = date_str.split()
+        date_part, time_part, am_pm = parts[0], parts[1], parts[2]
+        dt_str = f"{date_part} {time_part} {am_pm}"
+        return datetime.strptime(dt_str, '%m/%d/%Y %I:%M %p')
+    except Exception:
+        return None
+
 # =======================
 # Функция ожидания завершения загрузки
 # =======================
@@ -460,6 +472,7 @@ for file_name in os.listdir(download_dir):
                 "lot_number": row[1],
                 "retail_value": row[2],
                 "sale_date": row[3],
+                "sale_date_parsed": parsed_dt,
                 "year": int(row[4]) if row[4].isdigit() else None,
                 "make": row[5],
                 "model": row[6],
