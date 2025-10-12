@@ -467,6 +467,7 @@ for file_name in os.listdir(download_dir):
                 continue
             row[5] = normalize_make(row[5])
             sort_order_value = random.randint(1, 1_000_000)
+            parsed_dt = parse_sale_date(row[3])
             all_data.append({
                 "lot_url": row[0],
                 "lot_number": row[1],
