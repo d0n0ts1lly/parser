@@ -474,12 +474,13 @@ for file_name in os.listdir(download_dir):
             row[5] = normalize_make(row[5])
             sort_order_value = random.randint(1, 1_000_000)
             parsed_dt = parse_sale_date(row[3])
+            sale_date_json = parsed_dt.isoformat() if parsed_dt else None
             all_data.append({
                 "lot_url": row[0],
                 "lot_number": row[1],
                 "retail_value": row[2],
                 "sale_date": row[3],
-                "sale_date_parsed": parsed_dt,
+                "sale_date_parsed": sale_date_json,
                 "year": int(row[4]) if row[4].isdigit() else None,
                 "make": row[5],
                 "model": row[6],
