@@ -3,21 +3,19 @@ import csv
 import time
 import random
 import requests
+import shutil
+import glob
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import concurrent.futures
-import threading
-import glob
-import shutil
-from datetime import datetime
+from webdriver_manager.chrome import ChromeDriverManager # Добавь в requirements.txt
 
 # =======================
 # Настройка виртуального дисплея
 # =======================
-# Проверяем, запущено ли на GitHub Actions
 is_github_actions = os.getenv('GITHUB_ACTIONS') is not None
 
 if is_github_actions:
@@ -25,68 +23,53 @@ if is_github_actions:
         from pyvirtualdisplay import Display
         display = Display(visible=0, size=(1920, 1080))
         display.start()
-        print("🖥️ Виртуальный дисплей запущен на GitHub Actions")
+        print("🖥️ Виртуальный дисплей запущен")
     except Exception as e:
-        print(f"⚠ Не удалось запустить виртуальный дисплей: {e}")
-else:
-    print("🖥️ Локальный запуск")
+        print(f"⚠ Ошибка дисплея: {e}")
 
-# Абсолютный путь к папке загрузок
+# Папка загрузок
 download_dir = os.path.join(os.getcwd(), "downloads")
 os.makedirs(download_dir, exist_ok=True)
 
-print(f"Current working directory: {os.getcwd()}")
-print(f"Download folder: {download_dir}")
-print(f"Exists? {os.path.exists(download_dir)}")
-print(f"Files in download directory: {os.listdir(download_dir)}")
-
-# Данные из GitHub Secrets
-COPART_USER = os.environ["COPART_USER"]
-COPART_PASS = os.environ["COPART_PASS"]
-FLASK_CLEAR_URL = os.environ["FLASK_CLEAR_URL"]
-FLASK_UPLOAD_URL = os.environ["FLASK_UPLOAD_URL"]
+# Данные из Secrets
+COPART_USER = os.environ.get("COPART_USER")
+COPART_PASS = os.environ.get("COPART_PASS")
 
 # =======================
-# Selenium настройки БЕЗ headless
+# Selenium настройки
 # =======================
-if is_github_actions:
-    chrome_path = shutil.which("chromium-browser") or "/usr/bin/chromium-browser"
-    driver_path = shutil.which("chromedriver") or "/usr/bin/chromedriver"
-else:
-    chrome_path = "/usr/bin/chromium-browser"
-    driver_path = "/usr/bin/chromedriver"
-
 options = webdriver.ChromeOptions()
-options.binary_location = chrome_path
 
-# УБИРАЕМ headless аргумент для работы с виртуальным дисплеем
-# options.add_argument("--headless=new")  # ЗАКОММЕНТИРОВАНО
+# КРИТИЧНО: Используем Google Chrome, он стабильнее на GitHub
+if is_github_actions:
+    options.binary_location = "/usr/bin/google-chrome"
+else:
+    options.binary_location = "/usr/bin/chromium-browser"
 
 options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
+options.add_argument("--disable-dev-shm-usage") # Решает проблему со Stacktrace
 options.add_argument("--disable-gpu")
 options.add_argument("--window-size=1920,1080")
-options.add_argument("--disable-features=VizDisplayCompositor")
-options.add_argument("--disable-software-rasterizer")
 
-# Улучшенные настройки для загрузки файлов
+# ЗАЩИТА ОТ БЛОКИРОВКИ (чтобы заходило в Copart)
+options.add_argument("--disable-blink-features=AutomationControlled")
+options.add_experimental_option("excludeSwitches", ["enable-automation"])
+options.add_experimental_option('useAutomationExtension', False)
+
 prefs = {
     "download.default_directory": download_dir,
     "download.prompt_for_download": False,
     "download.directory_upgrade": True,
-    "safebrowsing.enabled": False,  # Отключаем для ускорения
-    "profile.default_content_settings.popups": 0,
-    "profile.content_settings.exceptions.automatic_downloads.*.setting": 1
+    "safebrowsing.enabled": False,
 }
 options.add_experimental_option("prefs", prefs)
 
-driver = webdriver.Chrome(service=Service(driver_path), options=options)
+# АВТО-УСТАНОВКА ДРАЙВЕРА (чтобы не гадать с путями)
+service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(service=service, options=options)
 
-# Принудительно устанавливаем поведение загрузки через CDP
-driver.execute_cdp_cmd(
-    "Page.setDownloadBehavior",
-    {"behavior": "allow", "downloadPath": download_dir}
-)
+# Разрешаем загрузку
+driver.execute_cdp_cmd("Page.setDownloadBehavior", {"behavior": "allow", "downloadPath": download_dir})
 
 wait = WebDriverWait(driver, 30)
 
