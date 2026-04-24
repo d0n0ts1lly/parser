@@ -239,6 +239,7 @@ def login_to_copart():
         return True
     except Exception as e:
         print(f"❌ Ошибка входа: {e}")
+        driver.save_screenshot("login_error.png")
         return False
 
 # =======================
