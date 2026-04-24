@@ -49,8 +49,12 @@ FLASK_UPLOAD_URL = os.environ["FLASK_UPLOAD_URL"]
 # =======================
 # Selenium настройки БЕЗ headless
 # =======================
-chrome_path = "/usr/bin/chromium-browser"
-driver_path = "/usr/bin/chromedriver"
+if is_github_actions:
+    chrome_path = shutil.which("chromium-browser") or "/usr/bin/chromium-browser"
+    driver_path = shutil.which("chromedriver") or "/usr/bin/chromedriver"
+else:
+    chrome_path = "/usr/bin/chromium-browser"
+    driver_path = "/usr/bin/chromedriver"
 
 options = webdriver.ChromeOptions()
 options.binary_location = chrome_path
