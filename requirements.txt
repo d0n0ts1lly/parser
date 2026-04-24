@@ -1,4 +1,2 @@
 selenium
 requests
-webdriver-manager
-pyvirtualdisplay
