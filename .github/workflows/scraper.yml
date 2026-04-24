@@ -28,16 +28,10 @@ jobs:
           pip install -r requirements.txt
           pip install pyvirtualdisplay  # ДОБАВЛЕНО
 
-      - name: Install Browser and Tools
-        run: |
-          sudo apt-get update
-          # xvfb нужен для pyvirtualdisplay, остальное для корректной работы Chrome
-          sudo apt-get install -y xvfb libxi6 libgconf-2-4
-
       - name: Install Chromium & chromedriver
         run: |
           sudo apt-get update
-          sudo apt-get install -y chromium-browser chromium-chromedriver xvfb
+          sudo apt-get install -y chromium-browser chromium-chromedriver xvfb libxi6 libgconf-2-4
 
       - name: Check Chrome & Driver versions
         run: |
