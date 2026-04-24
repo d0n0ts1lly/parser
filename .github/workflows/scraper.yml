@@ -50,3 +50,10 @@ jobs:
           COPART_PASS: ${{ secrets.COPART_PASS }}
           FLASK_CLEAR_URL: ${{ secrets.FLASK_CLEAR_URL }}
           FLASK_UPLOAD_URL: ${{ secrets.FLASK_UPLOAD_URL }}
+          
+      - name: Upload Screenshots
+      uses: actions/upload-artifact@v4
+      if: always() # Выполнять даже если предыдущий шаг (скрипт) упал с ошибкой
+      with:
+        name: selenium-screenshots
+        path: login_error.png
