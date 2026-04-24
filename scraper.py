@@ -99,15 +99,20 @@ def move_and_rename_file(original_filename, new_filename):
     return False
 
 def parse_sale_date(date_str):
-    if not date_str or date_str.startswith("Будущий"):
+    if not date_str or not isinstance(date_str, str) or "Будущий" in date_str:
         return None
     try:
-        # Пример: "09/30/2025 01:00 am GMT+3"
-        parts = date_str.split()
-        date_part, time_part, am_pm = parts[0], parts[1], parts[2]
-        dt_str = f"{date_part} {time_part} {am_pm}"
+        # Убираем UTC или GMT+3, оставляем только основные части
+        # Ограничиваем сплит, чтобы забрать первые 3 части (дата, время, am/pm)
+        parts = date_str.strip().split()
+        if len(parts) < 3:
+            return None
+            
+        dt_str = f"{parts[0]} {parts[1]} {parts[2]}"
+        # %I — это 12-часовой формат (01-12), %p — это AM/PM
         return datetime.strptime(dt_str, '%m/%d/%Y %I:%M %p')
-    except Exception:
+    except Exception as e:
+        print(f"Ошибка парсинга даты '{date_str}': {e}")
         return None
 
 # =======================
