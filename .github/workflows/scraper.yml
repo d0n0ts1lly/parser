@@ -31,7 +31,7 @@ jobs:
       - name: Install Chromium & chromedriver
         run: |
           sudo apt-get update
-          sudo apt-get install -y chromium-browser chromium-chromedriver xvfb libxi6 libgbm1 libasound2t64
+          sudo apt-get install -y chromium-browser chromium-chromedriver xvfb
 
       - name: Check Chrome & Driver versions
         run: |
