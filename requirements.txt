@@ -2,4 +2,3 @@ selenium
 requests
 webdriver-manager
 pyvirtualdisplay
-mysql-connector-python
