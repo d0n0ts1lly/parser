@@ -40,8 +40,8 @@ COPART_PASS = os.environ["COPART_PASS"]
 FLASK_CLEAR_URL = os.environ["FLASK_CLEAR_URL"]
 FLASK_UPLOAD_URL = os.environ["FLASK_UPLOAD_URL"]
 
-chrome_path = "/usr/bin/chromium-browser"
-driver_path = "/usr/bin/chromedriver"
+chrome_path = os.getenv("CHROME_PATH", "/usr/bin/chromium-browser")
+driver_path = os.getenv("CHROMEDRIVER_PATH", "/usr/bin/chromedriver")
 
 options = webdriver.ChromeOptions()
 options.binary_location = chrome_path
