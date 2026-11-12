@@ -2,7 +2,7 @@ name: Run Scraper
 
 on:
   schedule:
-    - cron: "0 * * * *"   # каждые час
+    - cron: "0 * * * *"   # каждый час
   workflow_dispatch:
 
 concurrency:
@@ -26,34 +26,39 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pyvirtualdisplay  # ДОБАВЛЕНО
+          pip install pyvirtualdisplay
 
-      - name: Install Chromium & chromedriver
+      - name: Install Xvfb
         run: |
           sudo apt-get update
-          sudo apt-get install -y chromium-browser chromium-chromedriver xvfb
+          sudo apt-get install -y xvfb
+
+      - name: Setup Chrome & chromedriver
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+          install-chromedriver: true
 
       - name: Check Chrome & Driver versions
         run: |
-          which chromium-browser || echo "chromium not found"
-          chromium-browser --version || echo "no chromium version"
-          which chromedriver || echo "chromedriver not found"
-          chromedriver --version || echo "no chromedriver version"
+          "${{ steps.setup-chrome.outputs.chrome-path }}" --version
+          "${{ steps.setup-chrome.outputs.chromedriver-path }}" --version
 
       - name: Run scraper
-        run: |
-          export CHROME_BIN=/usr/bin/chromium-browser
-          export PATH=$PATH:/usr/lib/chromium-browser/
-          python -u scraper.py
+        run: python -u scraper.py
         env:
           COPART_USER: ${{ secrets.COPART_USER }}
           COPART_PASS: ${{ secrets.COPART_PASS }}
           FLASK_CLEAR_URL: ${{ secrets.FLASK_CLEAR_URL }}
           FLASK_UPLOAD_URL: ${{ secrets.FLASK_UPLOAD_URL }}
-          
+          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+          CHROMEDRIVER_PATH: ${{ steps.setup-chrome.outputs.chromedriver-path }}
+
       - name: Upload Screenshots
         uses: actions/upload-artifact@v4
-        if: always() # Выполнять даже если предыдущий шаг (скрипт) упал с ошибкой
+        if: always()
         with:
           name: selenium-screenshots
           path: login_error.png
+          if-no-files-found: ignore
